@@ -219,7 +219,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al procesar: ${next.error}'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: colors.gasto,
             behavior: SnackBarBehavior.floating,
           ),
         );

@@ -4,7 +4,6 @@ import '../../../core/models/transaction_model.dart';
 import '../../../core/providers/stream_providers.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../settings/widgets/settings_drawer.dart';
 
 /// Pantalla 1: Dashboard Principal (Ícono Casita ⌂)
 /// Compendio de salud financiera con dos pestañas: "Inicio" y "A pagar".
@@ -36,10 +35,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
     return Scaffold(
       backgroundColor: colors.fondo,
-      drawer: const SettingsDrawer(),
       appBar: AppBar(
         backgroundColor: colors.fondo,
         elevation: 0,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(Icons.menu_rounded, color: colors.textoPrimario),
+            tooltip: 'Ajustes',
+            onPressed: () => ctx.findRootAncestorStateOfType<ScaffoldState>()?.openDrawer(),
+          ),
+        ),
         title: Text(
           'Inicio',
           style: TextStyle(
@@ -203,24 +208,14 @@ class _InicioTabViewState extends ConsumerState<_InicioTabView> with AutomaticKe
           const SizedBox(height: 28),
 
           // Título de sección "Últimos movimientos"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Últimos movimientos',
-                style: TextStyle(
-                  color: colors.textoPrimario,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              Icon(
-                Icons.edit_outlined,
-                size: 18,
-                color: colors.textoSecundario,
-              ),
-            ],
+          Text(
+            'Últimos movimientos',
+            style: TextStyle(
+              color: colors.textoPrimario,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.3,
+            ),
           ),
 
           const SizedBox(height: 12),
@@ -490,23 +485,13 @@ class _APagarTabViewState extends ConsumerState<_APagarTabView> with AutomaticKe
           const SizedBox(height: 28),
 
           // Título de sección "Últimos movimientos"
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Últimos movimientos',
-                style: TextStyle(
-                  color: colors.textoPrimario,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              Icon(
-                Icons.edit_outlined,
-                size: 18,
-                color: colors.textoSecundario,
-              ),
-            ],
+          Text(
+            'Últimos movimientos',
+            style: TextStyle(
+              color: colors.textoPrimario,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+            ),
           ),
 
           const SizedBox(height: 12),

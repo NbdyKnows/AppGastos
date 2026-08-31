@@ -77,6 +77,11 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('PRAGMA foreign_keys = ON;');
     },
   );
+
+  /// Vacía la tabla de transacciones de forma segura sin destruir cuentas ni categorías base.
+  Future<void> clearAllTransactions() async {
+    await delete(transacciones).go();
+  }
 }
 
 LazyDatabase _openConnection() {

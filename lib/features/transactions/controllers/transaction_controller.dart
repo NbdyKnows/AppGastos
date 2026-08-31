@@ -111,4 +111,19 @@ class TransactionController extends StateNotifier<AsyncValue<void>> {
       await _db.into(_db.mediosPago).insert(medio);
     });
   }
+
+  /// Vacía todas las transacciones registradas (Factory Reset de movimientos)
+  /// preservando medios de pago y categorías.
+  Future<void> wipeAllData() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await _db.clearAllTransactions();
+    });
+
+    if (!state.hasError && _ref.read(hapticsEnabledProvider)) {
+      try {
+        HapticFeedback.mediumImpact();
+      } catch (_) {}
+    }
+  }
 }

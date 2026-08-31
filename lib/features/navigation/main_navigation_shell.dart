@@ -7,6 +7,7 @@ import '../cards/screens/cards_screen.dart';
 import '../home/screens/home_screen.dart';
 import '../quick_record/quick_record_modal.dart';
 import '../reports/screens/reports_screen.dart';
+import '../settings/widgets/settings_drawer.dart';
 import '../transactions/screens/transactions_screen.dart';
 
 /// Shell de Navegación Principal de la Aplicación.
@@ -43,6 +44,7 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
 
     return Scaffold(
       backgroundColor: colors.fondo,
+      drawer: const SettingsDrawer(),
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
@@ -61,54 +63,51 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
+        notchMargin: 6.0,
         color: colors.superficie,
         elevation: 12,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.zero,
         child: SizedBox(
           height: 60,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Lado Izquierdo: Inicio y Historial
-              Row(
-                children: [
-                  _buildNavIcon(
-                    index: 0,
-                    icon: Icons.home_rounded,
-                    label: 'Inicio',
-                    colors: colors,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildNavIcon(
-                    index: 1,
-                    icon: Icons.swap_horiz_rounded,
-                    label: 'Historial',
-                    colors: colors,
-                  ),
-                ],
+              Expanded(
+                child: _buildNavIcon(
+                  index: 0,
+                  icon: Icons.home_rounded,
+                  label: 'Inicio',
+                  colors: colors,
+                ),
+              ),
+              Expanded(
+                child: _buildNavIcon(
+                  index: 1,
+                  icon: Icons.swap_horiz_rounded,
+                  label: 'Historial',
+                  colors: colors,
+                ),
               ),
 
-              // Espacio central para el botón FAB recortado
+              // Espacio central perfectamente centrado para el FAB recortado
               const SizedBox(width: 48),
 
               // Lado Derecho: Medios y Reportes
-              Row(
-                children: [
-                  _buildNavIcon(
-                    index: 2,
-                    icon: Icons.credit_card_rounded,
-                    label: 'Medios',
-                    colors: colors,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildNavIcon(
-                    index: 3,
-                    icon: Icons.bar_chart_rounded,
-                    label: 'Reportes',
-                    colors: colors,
-                  ),
-                ],
+              Expanded(
+                child: _buildNavIcon(
+                  index: 2,
+                  icon: Icons.credit_card_rounded,
+                  label: 'Medios',
+                  colors: colors,
+                ),
+              ),
+              Expanded(
+                child: _buildNavIcon(
+                  index: 3,
+                  icon: Icons.bar_chart_rounded,
+                  label: 'Reportes',
+                  colors: colors,
+                ),
               ),
             ],
           ),
@@ -127,17 +126,14 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
       borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 26,
-              color: isSelected ? colors.acento : colors.textoSecundario,
-            ),
-          ],
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Icon(
+            icon,
+            size: 26,
+            color: isSelected ? colors.acento : colors.textoSecundario,
+          ),
         ),
       ),
     );

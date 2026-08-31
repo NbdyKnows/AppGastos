@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_appgastos/core/database/seed_data.dart';
 import 'package:flutter_appgastos/core/providers/database_providers.dart';
 import 'package:flutter_appgastos/core/providers/settings_provider.dart';
 import 'package:flutter_appgastos/core/theme/app_theme.dart';
-import 'package:flutter_appgastos/features/home/screens/home_screen.dart';
 import 'package:flutter_appgastos/features/settings/widgets/settings_drawer.dart';
 import 'package:flutter_appgastos/main.dart';
 
@@ -69,21 +69,17 @@ void main() {
       expect(find.text('Inicio'), findsWidgets);
 
       // Open Drawer using the hamburger menu button in AppBar
-      final openDrawerButton = find.byTooltip('Open navigation menu');
-      if (openDrawerButton.evaluate().isNotEmpty) {
-        await tester.tap(openDrawerButton);
-      } else {
-        final homeScaffold = find.descendant(of: find.byType(HomeScreen), matching: find.byType(Scaffold));
-        tester.state<ScaffoldState>(homeScaffold).openDrawer();
-      }
+      final openDrawerButton = find.byIcon(Icons.menu_rounded).first;
+      await tester.tap(openDrawerButton);
       await tester.pumpAndSettle();
 
       // Check Drawer elements
       expect(find.byType(SettingsDrawer), findsOneWidget);
       expect(find.text('Ajustes'), findsOneWidget);
-      expect(find.text('v1.0.0'), findsOneWidget);
+      expect(find.text('v1.1.0'), findsOneWidget);
       expect(find.text('Vibración y Haptics'), findsOneWidget);
       expect(find.text('Modo Oscuro'), findsOneWidget);
+      expect(find.text('Borrar datos de prueba'), findsOneWidget);
 
       // Toggle Dark Mode Switch
       final darkModeSwitchFinder = find.widgetWithText(SwitchListTile, 'Modo Oscuro');
@@ -96,6 +92,47 @@ void main() {
       expect(hapticsSwitchFinder, findsOneWidget);
       await tester.tap(hapticsSwitchFinder);
       await tester.pumpAndSettle();
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
+
+    testWidgets('Borrar datos de prueba dialog triggers wipeAllData and clears transactions', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(db),
+          ],
+          child: const MyApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open Drawer
+      await tester.tap(find.byIcon(Icons.menu_rounded).first);
+      await tester.pumpAndSettle();
+
+      // Tap "Borrar datos de prueba"
+      await tester.tap(find.text('Borrar datos de prueba'));
+      await tester.pumpAndSettle();
+
+      // Dialog should be open
+      expect(find.text('¿Estás seguro de que deseas eliminar todas las transacciones registradas? Tus cuentas y categorías base se mantendrán intactas.'), findsOneWidget);
+      expect(find.text('Borrar'), findsOneWidget);
+
+      // Tap Borrar
+      await tester.tap(find.text('Borrar'));
+      await tester.pumpAndSettle();
+
+      // Verify transacciones count is 0 in DB
+      final remainingCount = await db.transacciones.count().getSingle();
+      expect(remainingCount, 0);
+
+      // Verify categorias and medios_pago are preserved
+      final catCount = await db.categorias.count().getSingle();
+      expect(catCount > 0, true);
+      final mediosCount = await db.mediosPago.count().getSingle();
+      expect(mediosCount > 0, true);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 50));

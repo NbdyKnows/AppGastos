@@ -3,9 +3,9 @@
     "fondo": "#0C1821",
     "superficie": "#1B2A41",
     "textoPrimario": "#FFFFFF",
-    "textoSecundario": "#324A5F",
+    "textoSecundario": "#94A3B8",
     "acento": "#FFF3B0",
-    "gasto": "#9E2A2B",
+    "gasto": "#FF6B6B",
     "ingreso": "#5C9E6D"
   },
   "Lemon Light": {
@@ -14,7 +14,7 @@
     "textoPrimario": "#0C1821",
     "textoSecundario": "#5C6A79",
     "acento": "#F4D144",
-    "gasto": "#D32F2F",
+    "gasto": "#E05656",
     "ingreso": "#388E3C"
   },
   "Dracula": {

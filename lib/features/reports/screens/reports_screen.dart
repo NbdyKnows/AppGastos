@@ -288,7 +288,13 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
       appBar: AppBar(
         backgroundColor: colors.fondo,
         elevation: 0,
-        leading: Icon(Icons.insights_rounded, color: colors.textoPrimario),
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: Icon(Icons.menu_rounded, color: colors.textoPrimario),
+            tooltip: 'Ajustes',
+            onPressed: () => ctx.findRootAncestorStateOfType<ScaffoldState>()?.openDrawer(),
+          ),
+        ),
         title: Text(
           'Reportes',
           style: TextStyle(

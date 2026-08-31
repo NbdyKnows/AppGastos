@@ -112,7 +112,7 @@ class _QuickRecordModalState extends ConsumerState<QuickRecordModal> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al registrar: ${next.error}'),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: colors.gasto,
             behavior: SnackBarBehavior.floating,
           ),
         );
