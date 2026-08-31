@@ -1,0 +1,30 @@
+{
+  "Lemon Dark": {
+    "fondo": "#0C1821",
+    "superficie": "#1B2A41",
+    "textoPrimario": "#FFFFFF",
+    "textoSecundario": "#324A5F",
+    "acento": "#FFF3B0",
+    "gasto": "#9E2A2B",
+    "ingreso": "#5C9E6D"
+  },
+  "Lemon Light": {
+    "fondo": "#F4F5F7",
+    "superficie": "#FFFFFF",
+    "textoPrimario": "#0C1821",
+    "textoSecundario": "#5C6A79",
+    "acento": "#F4D144",
+    "gasto": "#D32F2F",
+    "ingreso": "#388E3C"
+  },
+  "Dracula": {
+    "fondo": "#282A36",
+    "superficie": "#44475A",
+    "textoPrimario": "#F8F8F2",
+    "textoSecundario": "#6272A4",
+    "acento": "#FF79C6",
+    "gasto": "#FF5555",
+    "ingreso": "#50FA7B"
+  }
+}
+
