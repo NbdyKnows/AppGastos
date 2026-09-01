@@ -54,7 +54,7 @@ class ExportService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(
-                    'APPGASTOS - REPORTE MENSUAL',
+                    'KIP - REPORTE MENSUAL',
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
@@ -230,7 +230,7 @@ class ExportService {
 
     // Fila 1: Título del Reporte
     final titleCell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0));
-    titleCell.value = TextCellValue('APPGASTOS - REPORTE DE TRANSACCIONES ($mesNombre)');
+    titleCell.value = TextCellValue('KIP - REPORTE DE TRANSACCIONES ($mesNombre)');
     titleCell.cellStyle = CellStyle(bold: true, fontSize: 13);
 
     // Fila 3: Encabezados de la tabla
@@ -316,7 +316,7 @@ class ExportService {
 
     await Share.shareXFiles(
       [XFile(filePath)],
-      text: 'Reporte de Transacciones - AppGastos ($mesNombre)',
+      text: 'Reporte de Transacciones - Kip ($mesNombre)',
     );
   }
 }

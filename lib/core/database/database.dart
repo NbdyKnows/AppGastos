@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'daos/reportes_dao.dart';
 import 'daos/saldos_dao.dart';
+import 'daos/themes_dao.dart';
 import 'daos/transacciones_dao.dart';
 import 'tables.dart';
 
@@ -19,18 +20,20 @@ part 'database.g.dart';
     MediosPago,
     GastosFijos,
     Transacciones,
+    AppThemes,
   ],
   daos: [
     TransaccionesDao,
     SaldosDao,
     ReportesDao,
+    ThemesDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -71,6 +74,14 @@ class AppDatabase extends _$AppDatabase {
       await customStatement('CREATE INDEX idx_trans_mediopago ON transacciones(medio_pago_id);');
       await customStatement('CREATE INDEX idx_trans_mediopago_destino ON transacciones(medio_pago_destino_id);');
       await customStatement('CREATE INDEX idx_trans_padre ON transacciones(transaccion_padre_id);');
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Migración v1 → v2: no destructiva.
+      // Añade order_index a categorias y crea la tabla app_themes.
+      if (from < 2) {
+        await m.addColumn(categorias, categorias.orderIndex);
+        await m.createTable(appThemes);
+      }
     },
     beforeOpen: (details) async {
       // Garantizar foreign keys activas en cada apertura

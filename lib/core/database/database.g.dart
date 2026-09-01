@@ -69,6 +69,18 @@ class $CategoriasTable extends Categorias
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _orderIndexMeta = const VerificationMeta(
+    'orderIndex',
+  );
+  @override
+  late final GeneratedColumn<int> orderIndex = GeneratedColumn<int>(
+    'order_index',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _esPorDefectoMeta = const VerificationMeta(
     'esPorDefecto',
   );
@@ -140,6 +152,7 @@ class $CategoriasTable extends Categorias
     colorHex,
     icono,
     orden,
+    orderIndex,
     esPorDefecto,
     presupuestoAsignado,
     activo,
@@ -189,6 +202,12 @@ class $CategoriasTable extends Categorias
       context.handle(
         _ordenMeta,
         orden.isAcceptableOrUnknown(data['orden']!, _ordenMeta),
+      );
+    }
+    if (data.containsKey('order_index')) {
+      context.handle(
+        _orderIndexMeta,
+        orderIndex.isAcceptableOrUnknown(data['order_index']!, _orderIndexMeta),
       );
     }
     if (data.containsKey('es_por_defecto')) {
@@ -256,6 +275,10 @@ class $CategoriasTable extends Categorias
         DriftSqlType.int,
         data['${effectivePrefix}orden'],
       )!,
+      orderIndex: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_index'],
+      )!,
       esPorDefecto: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}es_por_defecto'],
@@ -291,6 +314,9 @@ class Categoria extends DataClass implements Insertable<Categoria> {
   final String colorHex;
   final String icono;
   final int orden;
+
+  /// Prioridad de visualización en los chips del Quick Record (1 = primero, 0 = sin prioridad).
+  final int orderIndex;
   final bool esPorDefecto;
   final double presupuestoAsignado;
   final bool activo;
@@ -302,6 +328,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
     required this.colorHex,
     required this.icono,
     required this.orden,
+    required this.orderIndex,
     required this.esPorDefecto,
     required this.presupuestoAsignado,
     required this.activo,
@@ -316,6 +343,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
     map['color_hex'] = Variable<String>(colorHex);
     map['icono'] = Variable<String>(icono);
     map['orden'] = Variable<int>(orden);
+    map['order_index'] = Variable<int>(orderIndex);
     map['es_por_defecto'] = Variable<bool>(esPorDefecto);
     map['presupuesto_asignado'] = Variable<double>(presupuestoAsignado);
     map['activo'] = Variable<bool>(activo);
@@ -331,6 +359,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
       colorHex: Value(colorHex),
       icono: Value(icono),
       orden: Value(orden),
+      orderIndex: Value(orderIndex),
       esPorDefecto: Value(esPorDefecto),
       presupuestoAsignado: Value(presupuestoAsignado),
       activo: Value(activo),
@@ -350,6 +379,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
       colorHex: serializer.fromJson<String>(json['colorHex']),
       icono: serializer.fromJson<String>(json['icono']),
       orden: serializer.fromJson<int>(json['orden']),
+      orderIndex: serializer.fromJson<int>(json['orderIndex']),
       esPorDefecto: serializer.fromJson<bool>(json['esPorDefecto']),
       presupuestoAsignado: serializer.fromJson<double>(
         json['presupuestoAsignado'],
@@ -368,6 +398,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
       'colorHex': serializer.toJson<String>(colorHex),
       'icono': serializer.toJson<String>(icono),
       'orden': serializer.toJson<int>(orden),
+      'orderIndex': serializer.toJson<int>(orderIndex),
       'esPorDefecto': serializer.toJson<bool>(esPorDefecto),
       'presupuestoAsignado': serializer.toJson<double>(presupuestoAsignado),
       'activo': serializer.toJson<bool>(activo),
@@ -382,6 +413,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
     String? colorHex,
     String? icono,
     int? orden,
+    int? orderIndex,
     bool? esPorDefecto,
     double? presupuestoAsignado,
     bool? activo,
@@ -393,6 +425,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
     colorHex: colorHex ?? this.colorHex,
     icono: icono ?? this.icono,
     orden: orden ?? this.orden,
+    orderIndex: orderIndex ?? this.orderIndex,
     esPorDefecto: esPorDefecto ?? this.esPorDefecto,
     presupuestoAsignado: presupuestoAsignado ?? this.presupuestoAsignado,
     activo: activo ?? this.activo,
@@ -406,6 +439,9 @@ class Categoria extends DataClass implements Insertable<Categoria> {
       colorHex: data.colorHex.present ? data.colorHex.value : this.colorHex,
       icono: data.icono.present ? data.icono.value : this.icono,
       orden: data.orden.present ? data.orden.value : this.orden,
+      orderIndex: data.orderIndex.present
+          ? data.orderIndex.value
+          : this.orderIndex,
       esPorDefecto: data.esPorDefecto.present
           ? data.esPorDefecto.value
           : this.esPorDefecto,
@@ -426,6 +462,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
           ..write('colorHex: $colorHex, ')
           ..write('icono: $icono, ')
           ..write('orden: $orden, ')
+          ..write('orderIndex: $orderIndex, ')
           ..write('esPorDefecto: $esPorDefecto, ')
           ..write('presupuestoAsignado: $presupuestoAsignado, ')
           ..write('activo: $activo, ')
@@ -442,6 +479,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
     colorHex,
     icono,
     orden,
+    orderIndex,
     esPorDefecto,
     presupuestoAsignado,
     activo,
@@ -457,6 +495,7 @@ class Categoria extends DataClass implements Insertable<Categoria> {
           other.colorHex == this.colorHex &&
           other.icono == this.icono &&
           other.orden == this.orden &&
+          other.orderIndex == this.orderIndex &&
           other.esPorDefecto == this.esPorDefecto &&
           other.presupuestoAsignado == this.presupuestoAsignado &&
           other.activo == this.activo &&
@@ -470,6 +509,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
   final Value<String> colorHex;
   final Value<String> icono;
   final Value<int> orden;
+  final Value<int> orderIndex;
   final Value<bool> esPorDefecto;
   final Value<double> presupuestoAsignado;
   final Value<bool> activo;
@@ -481,6 +521,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
     this.colorHex = const Value.absent(),
     this.icono = const Value.absent(),
     this.orden = const Value.absent(),
+    this.orderIndex = const Value.absent(),
     this.esPorDefecto = const Value.absent(),
     this.presupuestoAsignado = const Value.absent(),
     this.activo = const Value.absent(),
@@ -493,6 +534,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
     required String colorHex,
     required String icono,
     this.orden = const Value.absent(),
+    this.orderIndex = const Value.absent(),
     this.esPorDefecto = const Value.absent(),
     this.presupuestoAsignado = const Value.absent(),
     this.activo = const Value.absent(),
@@ -507,6 +549,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
     Expression<String>? colorHex,
     Expression<String>? icono,
     Expression<int>? orden,
+    Expression<int>? orderIndex,
     Expression<bool>? esPorDefecto,
     Expression<double>? presupuestoAsignado,
     Expression<bool>? activo,
@@ -519,6 +562,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
       if (colorHex != null) 'color_hex': colorHex,
       if (icono != null) 'icono': icono,
       if (orden != null) 'orden': orden,
+      if (orderIndex != null) 'order_index': orderIndex,
       if (esPorDefecto != null) 'es_por_defecto': esPorDefecto,
       if (presupuestoAsignado != null)
         'presupuesto_asignado': presupuestoAsignado,
@@ -534,6 +578,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
     Value<String>? colorHex,
     Value<String>? icono,
     Value<int>? orden,
+    Value<int>? orderIndex,
     Value<bool>? esPorDefecto,
     Value<double>? presupuestoAsignado,
     Value<bool>? activo,
@@ -546,6 +591,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
       colorHex: colorHex ?? this.colorHex,
       icono: icono ?? this.icono,
       orden: orden ?? this.orden,
+      orderIndex: orderIndex ?? this.orderIndex,
       esPorDefecto: esPorDefecto ?? this.esPorDefecto,
       presupuestoAsignado: presupuestoAsignado ?? this.presupuestoAsignado,
       activo: activo ?? this.activo,
@@ -571,6 +617,9 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
     }
     if (orden.present) {
       map['orden'] = Variable<int>(orden.value);
+    }
+    if (orderIndex.present) {
+      map['order_index'] = Variable<int>(orderIndex.value);
     }
     if (esPorDefecto.present) {
       map['es_por_defecto'] = Variable<bool>(esPorDefecto.value);
@@ -598,6 +647,7 @@ class CategoriasCompanion extends UpdateCompanion<Categoria> {
           ..write('colorHex: $colorHex, ')
           ..write('icono: $icono, ')
           ..write('orden: $orden, ')
+          ..write('orderIndex: $orderIndex, ')
           ..write('esPorDefecto: $esPorDefecto, ')
           ..write('presupuestoAsignado: $presupuestoAsignado, ')
           ..write('activo: $activo, ')
@@ -2625,6 +2675,475 @@ class TransaccionesCompanion extends UpdateCompanion<Transaccion> {
   }
 }
 
+class $AppThemesTable extends AppThemes
+    with TableInfo<$AppThemesTable, AppThemeEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AppThemesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _backgroundHexMeta = const VerificationMeta(
+    'backgroundHex',
+  );
+  @override
+  late final GeneratedColumn<String> backgroundHex = GeneratedColumn<String>(
+    'background_hex',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _surfaceHexMeta = const VerificationMeta(
+    'surfaceHex',
+  );
+  @override
+  late final GeneratedColumn<String> surfaceHex = GeneratedColumn<String>(
+    'surface_hex',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _textHexMeta = const VerificationMeta(
+    'textHex',
+  );
+  @override
+  late final GeneratedColumn<String> textHex = GeneratedColumn<String>(
+    'text_hex',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _accentHexMeta = const VerificationMeta(
+    'accentHex',
+  );
+  @override
+  late final GeneratedColumn<String> accentHex = GeneratedColumn<String>(
+    'accent_hex',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCustomMeta = const VerificationMeta(
+    'isCustom',
+  );
+  @override
+  late final GeneratedColumn<bool> isCustom = GeneratedColumn<bool>(
+    'is_custom',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_custom" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    backgroundHex,
+    surfaceHex,
+    textHex,
+    accentHex,
+    isCustom,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'app_themes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AppThemeEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('background_hex')) {
+      context.handle(
+        _backgroundHexMeta,
+        backgroundHex.isAcceptableOrUnknown(
+          data['background_hex']!,
+          _backgroundHexMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_backgroundHexMeta);
+    }
+    if (data.containsKey('surface_hex')) {
+      context.handle(
+        _surfaceHexMeta,
+        surfaceHex.isAcceptableOrUnknown(data['surface_hex']!, _surfaceHexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_surfaceHexMeta);
+    }
+    if (data.containsKey('text_hex')) {
+      context.handle(
+        _textHexMeta,
+        textHex.isAcceptableOrUnknown(data['text_hex']!, _textHexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_textHexMeta);
+    }
+    if (data.containsKey('accent_hex')) {
+      context.handle(
+        _accentHexMeta,
+        accentHex.isAcceptableOrUnknown(data['accent_hex']!, _accentHexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_accentHexMeta);
+    }
+    if (data.containsKey('is_custom')) {
+      context.handle(
+        _isCustomMeta,
+        isCustom.isAcceptableOrUnknown(data['is_custom']!, _isCustomMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AppThemeEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppThemeEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      backgroundHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}background_hex'],
+      )!,
+      surfaceHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}surface_hex'],
+      )!,
+      textHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}text_hex'],
+      )!,
+      accentHex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}accent_hex'],
+      )!,
+      isCustom: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_custom'],
+      )!,
+    );
+  }
+
+  @override
+  $AppThemesTable createAlias(String alias) {
+    return $AppThemesTable(attachedDatabase, alias);
+  }
+}
+
+class AppThemeEntry extends DataClass implements Insertable<AppThemeEntry> {
+  final int id;
+
+  /// Nombre único del tema, ej. "Lemon Dark", "Mi Tema Azul".
+  final String name;
+  final String backgroundHex;
+  final String surfaceHex;
+  final String textHex;
+  final String accentHex;
+
+  /// false = tema de sistema (no se puede borrar). true = creado por el usuario.
+  final bool isCustom;
+  const AppThemeEntry({
+    required this.id,
+    required this.name,
+    required this.backgroundHex,
+    required this.surfaceHex,
+    required this.textHex,
+    required this.accentHex,
+    required this.isCustom,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['background_hex'] = Variable<String>(backgroundHex);
+    map['surface_hex'] = Variable<String>(surfaceHex);
+    map['text_hex'] = Variable<String>(textHex);
+    map['accent_hex'] = Variable<String>(accentHex);
+    map['is_custom'] = Variable<bool>(isCustom);
+    return map;
+  }
+
+  AppThemesCompanion toCompanion(bool nullToAbsent) {
+    return AppThemesCompanion(
+      id: Value(id),
+      name: Value(name),
+      backgroundHex: Value(backgroundHex),
+      surfaceHex: Value(surfaceHex),
+      textHex: Value(textHex),
+      accentHex: Value(accentHex),
+      isCustom: Value(isCustom),
+    );
+  }
+
+  factory AppThemeEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppThemeEntry(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      backgroundHex: serializer.fromJson<String>(json['backgroundHex']),
+      surfaceHex: serializer.fromJson<String>(json['surfaceHex']),
+      textHex: serializer.fromJson<String>(json['textHex']),
+      accentHex: serializer.fromJson<String>(json['accentHex']),
+      isCustom: serializer.fromJson<bool>(json['isCustom']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'backgroundHex': serializer.toJson<String>(backgroundHex),
+      'surfaceHex': serializer.toJson<String>(surfaceHex),
+      'textHex': serializer.toJson<String>(textHex),
+      'accentHex': serializer.toJson<String>(accentHex),
+      'isCustom': serializer.toJson<bool>(isCustom),
+    };
+  }
+
+  AppThemeEntry copyWith({
+    int? id,
+    String? name,
+    String? backgroundHex,
+    String? surfaceHex,
+    String? textHex,
+    String? accentHex,
+    bool? isCustom,
+  }) => AppThemeEntry(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    backgroundHex: backgroundHex ?? this.backgroundHex,
+    surfaceHex: surfaceHex ?? this.surfaceHex,
+    textHex: textHex ?? this.textHex,
+    accentHex: accentHex ?? this.accentHex,
+    isCustom: isCustom ?? this.isCustom,
+  );
+  AppThemeEntry copyWithCompanion(AppThemesCompanion data) {
+    return AppThemeEntry(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      backgroundHex: data.backgroundHex.present
+          ? data.backgroundHex.value
+          : this.backgroundHex,
+      surfaceHex: data.surfaceHex.present
+          ? data.surfaceHex.value
+          : this.surfaceHex,
+      textHex: data.textHex.present ? data.textHex.value : this.textHex,
+      accentHex: data.accentHex.present ? data.accentHex.value : this.accentHex,
+      isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppThemeEntry(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('backgroundHex: $backgroundHex, ')
+          ..write('surfaceHex: $surfaceHex, ')
+          ..write('textHex: $textHex, ')
+          ..write('accentHex: $accentHex, ')
+          ..write('isCustom: $isCustom')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    backgroundHex,
+    surfaceHex,
+    textHex,
+    accentHex,
+    isCustom,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppThemeEntry &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.backgroundHex == this.backgroundHex &&
+          other.surfaceHex == this.surfaceHex &&
+          other.textHex == this.textHex &&
+          other.accentHex == this.accentHex &&
+          other.isCustom == this.isCustom);
+}
+
+class AppThemesCompanion extends UpdateCompanion<AppThemeEntry> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> backgroundHex;
+  final Value<String> surfaceHex;
+  final Value<String> textHex;
+  final Value<String> accentHex;
+  final Value<bool> isCustom;
+  const AppThemesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.backgroundHex = const Value.absent(),
+    this.surfaceHex = const Value.absent(),
+    this.textHex = const Value.absent(),
+    this.accentHex = const Value.absent(),
+    this.isCustom = const Value.absent(),
+  });
+  AppThemesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String backgroundHex,
+    required String surfaceHex,
+    required String textHex,
+    required String accentHex,
+    this.isCustom = const Value.absent(),
+  }) : name = Value(name),
+       backgroundHex = Value(backgroundHex),
+       surfaceHex = Value(surfaceHex),
+       textHex = Value(textHex),
+       accentHex = Value(accentHex);
+  static Insertable<AppThemeEntry> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? backgroundHex,
+    Expression<String>? surfaceHex,
+    Expression<String>? textHex,
+    Expression<String>? accentHex,
+    Expression<bool>? isCustom,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (backgroundHex != null) 'background_hex': backgroundHex,
+      if (surfaceHex != null) 'surface_hex': surfaceHex,
+      if (textHex != null) 'text_hex': textHex,
+      if (accentHex != null) 'accent_hex': accentHex,
+      if (isCustom != null) 'is_custom': isCustom,
+    });
+  }
+
+  AppThemesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? backgroundHex,
+    Value<String>? surfaceHex,
+    Value<String>? textHex,
+    Value<String>? accentHex,
+    Value<bool>? isCustom,
+  }) {
+    return AppThemesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      backgroundHex: backgroundHex ?? this.backgroundHex,
+      surfaceHex: surfaceHex ?? this.surfaceHex,
+      textHex: textHex ?? this.textHex,
+      accentHex: accentHex ?? this.accentHex,
+      isCustom: isCustom ?? this.isCustom,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (backgroundHex.present) {
+      map['background_hex'] = Variable<String>(backgroundHex.value);
+    }
+    if (surfaceHex.present) {
+      map['surface_hex'] = Variable<String>(surfaceHex.value);
+    }
+    if (textHex.present) {
+      map['text_hex'] = Variable<String>(textHex.value);
+    }
+    if (accentHex.present) {
+      map['accent_hex'] = Variable<String>(accentHex.value);
+    }
+    if (isCustom.present) {
+      map['is_custom'] = Variable<bool>(isCustom.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppThemesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('backgroundHex: $backgroundHex, ')
+          ..write('surfaceHex: $surfaceHex, ')
+          ..write('textHex: $textHex, ')
+          ..write('accentHex: $accentHex, ')
+          ..write('isCustom: $isCustom')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2634,11 +3153,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MediosPagoTable mediosPago = $MediosPagoTable(this);
   late final $GastosFijosTable gastosFijos = $GastosFijosTable(this);
   late final $TransaccionesTable transacciones = $TransaccionesTable(this);
+  late final $AppThemesTable appThemes = $AppThemesTable(this);
   late final TransaccionesDao transaccionesDao = TransaccionesDao(
     this as AppDatabase,
   );
   late final SaldosDao saldosDao = SaldosDao(this as AppDatabase);
   late final ReportesDao reportesDao = ReportesDao(this as AppDatabase);
+  late final ThemesDao themesDao = ThemesDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2649,6 +3170,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     mediosPago,
     gastosFijos,
     transacciones,
+    appThemes,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -2669,6 +3191,7 @@ typedef $$CategoriasTableCreateCompanionBuilder =
       required String colorHex,
       required String icono,
       Value<int> orden,
+      Value<int> orderIndex,
       Value<bool> esPorDefecto,
       Value<double> presupuestoAsignado,
       Value<bool> activo,
@@ -2682,6 +3205,7 @@ typedef $$CategoriasTableUpdateCompanionBuilder =
       Value<String> colorHex,
       Value<String> icono,
       Value<int> orden,
+      Value<int> orderIndex,
       Value<bool> esPorDefecto,
       Value<double> presupuestoAsignado,
       Value<bool> activo,
@@ -2782,6 +3306,11 @@ class $$CategoriasTableFilterComposer
 
   ColumnFilters<int> get orden => $composableBuilder(
     column: $table.orden,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2920,6 +3449,11 @@ class $$CategoriasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get esPorDefecto => $composableBuilder(
     column: $table.esPorDefecto,
     builder: (column) => ColumnOrderings(column),
@@ -2969,6 +3503,11 @@ class $$CategoriasTableAnnotationComposer
 
   GeneratedColumn<int> get orden =>
       $composableBuilder(column: $table.orden, builder: (column) => column);
+
+  GeneratedColumn<int> get orderIndex => $composableBuilder(
+    column: $table.orderIndex,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get esPorDefecto => $composableBuilder(
     column: $table.esPorDefecto,
@@ -3103,6 +3642,7 @@ class $$CategoriasTableTableManager
                 Value<String> colorHex = const Value.absent(),
                 Value<String> icono = const Value.absent(),
                 Value<int> orden = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
                 Value<bool> esPorDefecto = const Value.absent(),
                 Value<double> presupuestoAsignado = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
@@ -3114,6 +3654,7 @@ class $$CategoriasTableTableManager
                 colorHex: colorHex,
                 icono: icono,
                 orden: orden,
+                orderIndex: orderIndex,
                 esPorDefecto: esPorDefecto,
                 presupuestoAsignado: presupuestoAsignado,
                 activo: activo,
@@ -3127,6 +3668,7 @@ class $$CategoriasTableTableManager
                 required String colorHex,
                 required String icono,
                 Value<int> orden = const Value.absent(),
+                Value<int> orderIndex = const Value.absent(),
                 Value<bool> esPorDefecto = const Value.absent(),
                 Value<double> presupuestoAsignado = const Value.absent(),
                 Value<bool> activo = const Value.absent(),
@@ -3138,6 +3680,7 @@ class $$CategoriasTableTableManager
                 colorHex: colorHex,
                 icono: icono,
                 orden: orden,
+                orderIndex: orderIndex,
                 esPorDefecto: esPorDefecto,
                 presupuestoAsignado: presupuestoAsignado,
                 activo: activo,
@@ -5297,6 +5840,242 @@ typedef $$TransaccionesTableProcessedTableManager =
         bool medioPagoDestinoId,
       })
     >;
+typedef $$AppThemesTableCreateCompanionBuilder =
+    AppThemesCompanion Function({
+      Value<int> id,
+      required String name,
+      required String backgroundHex,
+      required String surfaceHex,
+      required String textHex,
+      required String accentHex,
+      Value<bool> isCustom,
+    });
+typedef $$AppThemesTableUpdateCompanionBuilder =
+    AppThemesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> backgroundHex,
+      Value<String> surfaceHex,
+      Value<String> textHex,
+      Value<String> accentHex,
+      Value<bool> isCustom,
+    });
+
+class $$AppThemesTableFilterComposer
+    extends Composer<_$AppDatabase, $AppThemesTable> {
+  $$AppThemesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get backgroundHex => $composableBuilder(
+    column: $table.backgroundHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get surfaceHex => $composableBuilder(
+    column: $table.surfaceHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get textHex => $composableBuilder(
+    column: $table.textHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get accentHex => $composableBuilder(
+    column: $table.accentHex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AppThemesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AppThemesTable> {
+  $$AppThemesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get backgroundHex => $composableBuilder(
+    column: $table.backgroundHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get surfaceHex => $composableBuilder(
+    column: $table.surfaceHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get textHex => $composableBuilder(
+    column: $table.textHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get accentHex => $composableBuilder(
+    column: $table.accentHex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AppThemesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AppThemesTable> {
+  $$AppThemesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get backgroundHex => $composableBuilder(
+    column: $table.backgroundHex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get surfaceHex => $composableBuilder(
+    column: $table.surfaceHex,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get textHex =>
+      $composableBuilder(column: $table.textHex, builder: (column) => column);
+
+  GeneratedColumn<String> get accentHex =>
+      $composableBuilder(column: $table.accentHex, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCustom =>
+      $composableBuilder(column: $table.isCustom, builder: (column) => column);
+}
+
+class $$AppThemesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppThemesTable,
+          AppThemeEntry,
+          $$AppThemesTableFilterComposer,
+          $$AppThemesTableOrderingComposer,
+          $$AppThemesTableAnnotationComposer,
+          $$AppThemesTableCreateCompanionBuilder,
+          $$AppThemesTableUpdateCompanionBuilder,
+          (
+            AppThemeEntry,
+            BaseReferences<_$AppDatabase, $AppThemesTable, AppThemeEntry>,
+          ),
+          AppThemeEntry,
+          PrefetchHooks Function()
+        > {
+  $$AppThemesTableTableManager(_$AppDatabase db, $AppThemesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AppThemesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AppThemesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AppThemesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> backgroundHex = const Value.absent(),
+                Value<String> surfaceHex = const Value.absent(),
+                Value<String> textHex = const Value.absent(),
+                Value<String> accentHex = const Value.absent(),
+                Value<bool> isCustom = const Value.absent(),
+              }) => AppThemesCompanion(
+                id: id,
+                name: name,
+                backgroundHex: backgroundHex,
+                surfaceHex: surfaceHex,
+                textHex: textHex,
+                accentHex: accentHex,
+                isCustom: isCustom,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String backgroundHex,
+                required String surfaceHex,
+                required String textHex,
+                required String accentHex,
+                Value<bool> isCustom = const Value.absent(),
+              }) => AppThemesCompanion.insert(
+                id: id,
+                name: name,
+                backgroundHex: backgroundHex,
+                surfaceHex: surfaceHex,
+                textHex: textHex,
+                accentHex: accentHex,
+                isCustom: isCustom,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AppThemesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppThemesTable,
+      AppThemeEntry,
+      $$AppThemesTableFilterComposer,
+      $$AppThemesTableOrderingComposer,
+      $$AppThemesTableAnnotationComposer,
+      $$AppThemesTableCreateCompanionBuilder,
+      $$AppThemesTableUpdateCompanionBuilder,
+      (
+        AppThemeEntry,
+        BaseReferences<_$AppDatabase, $AppThemesTable, AppThemeEntry>,
+      ),
+      AppThemeEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5311,4 +6090,6 @@ class $AppDatabaseManager {
       $$GastosFijosTableTableManager(_db, _db.gastosFijos);
   $$TransaccionesTableTableManager get transacciones =>
       $$TransaccionesTableTableManager(_db, _db.transacciones);
+  $$AppThemesTableTableManager get appThemes =>
+      $$AppThemesTableTableManager(_db, _db.appThemes);
 }

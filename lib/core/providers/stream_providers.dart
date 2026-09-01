@@ -269,12 +269,16 @@ final cuentasDebitoYEfectivoProvider = StreamProvider<List<MedioPago>>((ref) {
       .watch();
 });
 
-/// 7. Lista de Categorías activas.
+/// 7. Lista de Categorías activas, ordenadas por orderIndex ASC (prioridad de UI).
+/// La primera de la lista se preselecciona en el Quick Record.
 final categoriasListProvider = StreamProvider<List<Categoria>>((ref) {
   final db = ref.watch(databaseProvider);
   return (db.select(db.categorias)
         ..where((tbl) => tbl.activo.equals(true))
-        ..orderBy([(tbl) => OrderingTerm.asc(tbl.orden), (tbl) => OrderingTerm.asc(tbl.id)]))
+        ..orderBy([
+          (tbl) => OrderingTerm.asc(tbl.orderIndex),
+          (tbl) => OrderingTerm.asc(tbl.id),
+        ]))
       .watch();
 });
 
@@ -285,4 +289,34 @@ final mediosPagoListProvider = StreamProvider<List<MedioPago>>((ref) {
         ..where((tbl) => tbl.activo.equals(true))
         ..orderBy([(tbl) => OrderingTerm.asc(tbl.id)]))
       .watch();
+});
+
+/// 9. Meses con movimientos registrados (para el timeline dinámico en Movimientos Registrados).
+///
+/// FIX de zona horaria: No usamos strftime en SQL porque opera en UTC y Perú es UTC-5.
+/// En su lugar, Drift deserializa los [DateTime] en hora local, y hacemos el agrupamiento
+/// por mes en Dart usando un fold. Así un gasto del 1-sep a las 3 AM local
+/// nunca se agrupa incorrectamente en agosto.
+///
+/// Retorna lista de [DateTime] (primer día de cada mes), ordenados del más reciente al más antiguo.
+final mesesConMovimientosProvider = StreamProvider<List<DateTime>>((ref) {
+  final db = ref.watch(databaseProvider);
+  // Leemos solo el campo fecha de todas las transacciones
+  final query = db.customSelect(
+    'SELECT fecha FROM transacciones ORDER BY fecha DESC',
+    readsFrom: {db.transacciones},
+  );
+  return query.watch().map((rows) {
+    final uniqueMonths = <String, DateTime>{};
+    for (final row in rows) {
+      // Drift entrega el valor como int (milisegundos epoch). Lo convertimos a DateTime local.
+      final epochMs = row.read<int>('fecha');
+      final dt = DateTime.fromMillisecondsSinceEpoch(epochMs);
+      // Clave única por año-mes en hora local del dispositivo
+      final key = '${dt.year}-${dt.month.toString().padLeft(2, '0')}';
+      uniqueMonths.putIfAbsent(key, () => DateTime(dt.year, dt.month, 1));
+    }
+    // Ya están en orden DESC (más reciente primero) por la cláusula ORDER BY del SQL
+    return uniqueMonths.values.toList();
+  });
 });

@@ -87,8 +87,16 @@ class SettingsStringNotifier extends StateNotifier<String> {
   }
 }
 
-/// Provider para la paleta de colores activa ('Lemon', 'Dracula', 'Emerald', 'Indigo').
+/// Provider para la paleta de colores activa ('Lemon', 'Dracula', 'Emerald', 'Indigo' o nombre custom).
 final selectedThemePaletteProvider =
     StateNotifierProvider<SettingsStringNotifier, String>((ref) {
   return SettingsStringNotifier(key: 'selected_theme_palette', defaultValue: 'Lemon');
+});
+
+/// Provider para la familia tipográfica activa.
+/// Opciones curadas: 'Inter', 'Outfit', 'Poppins', 'Space Grotesk', 'Roboto'.
+/// Persistido en SharedPreferences. Valor por defecto: 'Inter'.
+final fontFamilyProvider =
+    StateNotifierProvider<SettingsStringNotifier, String>((ref) {
+  return SettingsStringNotifier(key: 'font_family', defaultValue: 'Inter');
 });

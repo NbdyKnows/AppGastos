@@ -12,6 +12,8 @@ class Categorias extends Table {
   TextColumn get colorHex => text().withLength(min: 1, max: 7)();
   TextColumn get icono => text()();
   IntColumn get orden => integer().withDefault(const Constant(0))();
+  /// Prioridad de visualización en los chips del Quick Record (1 = primero, 0 = sin prioridad).
+  IntColumn get orderIndex => integer().withDefault(const Constant(0))();
   BoolColumn get esPorDefecto => boolean().withDefault(const Constant(false))();
   RealColumn get presupuestoAsignado => real().withDefault(const Constant(0.0))();
   BoolColumn get activo => boolean().withDefault(const Constant(true))();
@@ -108,4 +110,20 @@ class Transacciones extends Table {
   List<String> get customConstraints => [
     'CHECK (medio_pago_destino_id IS NULL OR medio_pago_destino_id != medio_pago_id)',
   ];
+}
+
+/// 6. AppThemes:
+/// Motor de temas dinámicos. Almacena paletas del sistema y personalizadas.
+/// Los temas de sistema tienen isCustom = false y no pueden borrarse.
+@DataClassName('AppThemeEntry')
+class AppThemes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Nombre único del tema, ej. "Lemon Dark", "Mi Tema Azul".
+  TextColumn get name => text().withLength(min: 1, max: 50).unique()();
+  TextColumn get backgroundHex => text()();
+  TextColumn get surfaceHex => text()();
+  TextColumn get textHex => text()();
+  TextColumn get accentHex => text()();
+  /// false = tema de sistema (no se puede borrar). true = creado por el usuario.
+  BoolColumn get isCustom => boolean().withDefault(const Constant(false))();
 }

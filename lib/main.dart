@@ -1,76 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'core/database/database.dart';
 import 'core/database/seed_data.dart';
 import 'core/providers/database_providers.dart';
 import 'core/providers/settings_provider.dart';
+import 'core/providers/theme_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'features/navigation/main_navigation_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // a) Carga de los temas
-  Map<String, AppColors> themes;
-  try {
-    themes = await AppTheme.loadThemesFromJson();
-  } catch (e) {
-    themes = {
-      'Lemon Dark': AppColors.lemonDarkFallback,
-      'Lemon Light': AppColors.lemonLightFallback,
-    };
-  }
+  // Fix 4: Deshabilitar la descarga de fuentes en red.
+  // Google Fonts usará exclusivamente los assets locales declarados en pubspec.yaml.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
-  // b) Instanciación única de AppDatabase()
+  // Instanciación única de AppDatabase
   final db = AppDatabase();
 
-  // c) Ejecución del Seeding inicial pasando esa única instancia
+  // Seed de datos iniciales (categorías, medios de pago, temas del sistema)
   await seedInitialData(db);
 
-  // Envuelve MyApp() en un ProviderScope con override de databaseProvider
   runApp(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
       ],
-      child: MyApp(themes: themes),
+      child: const KipApp(),
     ),
   );
 }
 
-class MyApp extends StatelessWidget {
-  final Map<String, AppColors>? themes;
+class KipApp extends ConsumerWidget {
   final AppColors? initialColors;
 
-  const MyApp({super.key, this.themes, this.initialColors});
+  const KipApp({super.key, this.initialColors});
 
   @override
-  Widget build(BuildContext context) {
-    return Consumer(
-      builder: (context, ref, child) {
-        final isDarkMode = ref.watch(isDarkModeProvider);
-        final selectedPalette = ref.watch(selectedThemePaletteProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Leer el tema activo desde la BD (reactivo) o usar initialColors si fue provisto (tests)
+    final dbColors = ref.watch(activeThemeColorsProvider);
+    final activeColors = initialColors ?? dbColors;
 
-        final currentThemes = themes ?? {
-          'Lemon Dark': initialColors ?? AppColors.lemonDarkFallback,
-          'Lemon Light': AppColors.lemonLightFallback,
-        };
+    // Leer la fuente seleccionada (persistida en SharedPreferences)
+    final fontFamily = ref.watch(fontFamilyProvider);
 
-        final themeKey = '$selectedPalette ${isDarkMode ? 'Dark' : 'Light'}';
-        final themeColors = currentThemes[themeKey] ??
-            (isDarkMode
-                ? (currentThemes['$selectedPalette Dark'] ?? currentThemes[selectedPalette] ?? AppColors.lemonDarkFallback)
-                : (currentThemes['$selectedPalette Light'] ?? AppColors.lemonLightFallback));
-
-        return MaterialApp(
-          title: 'AppGastos', // No cambiar este nombre
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.buildTheme(themeColors),
-          home: const MainNavigationShell(),
-        );
-      },
+    return MaterialApp(
+      title: 'Kip',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.buildTheme(activeColors, fontFamily: fontFamily),
+      home: const MainNavigationShell(),
     );
   }
 }
 
-
+/// Alias para compatibilidad total con tests existentes.
+typedef MyApp = KipApp;
