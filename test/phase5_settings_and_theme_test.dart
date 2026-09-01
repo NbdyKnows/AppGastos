@@ -79,7 +79,20 @@ void main() {
       expect(find.text('v1.1.0'), findsOneWidget);
       expect(find.text('Vibración y Haptics'), findsOneWidget);
       expect(find.text('Modo Oscuro'), findsOneWidget);
+      expect(find.text('PALETA DE COLORES'), findsOneWidget);
+      expect(find.text('Lemon'), findsOneWidget);
+      expect(find.text('Dracula'), findsOneWidget);
+      expect(find.text('Emerald'), findsOneWidget);
+      expect(find.text('Indigo'), findsOneWidget);
       expect(find.text('Borrar datos de prueba'), findsOneWidget);
+
+      // Select Dracula palette
+      await tester.tap(find.text('Dracula'));
+      await tester.pumpAndSettle();
+
+      // Select Emerald palette
+      await tester.tap(find.text('Emerald'));
+      await tester.pumpAndSettle();
 
       // Toggle Dark Mode Switch
       final darkModeSwitchFinder = find.widgetWithText(SwitchListTile, 'Modo Oscuro');

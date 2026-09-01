@@ -224,6 +224,443 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
     );
   }
 
+  void _showEditPaymentMethodModal(PaymentMethodItem method) {
+    final colors = context.appColors;
+    final id = int.tryParse(method.id);
+    if (id == null) return;
+
+    final editNameCtrl = TextEditingController(text: method.name);
+    String editSelectedBank = method.bank.isNotEmpty ? method.bank : 'Interbank';
+    if (!_banks.contains(editSelectedBank) && editSelectedBank.isNotEmpty) {
+      _banks.insert(_banks.length - 1, editSelectedBank);
+    }
+
+    String editSelectedType = method.isCredit ? 'credito' : (method.type.toLowerCase() == 'efectivo' ? 'efectivo' : 'debito');
+    final editInitialBalanceCtrl = TextEditingController(
+      text: method.initialBalance > 0 ? method.initialBalance.toStringAsFixed(2) : '',
+    );
+    final editCreditLimitCtrl = TextEditingController(
+      text: method.creditLimit != null ? method.creditLimit!.toStringAsFixed(2) : '',
+    );
+    final editCutoffCtrl = TextEditingController(
+      text: method.rawCutoffDay != null ? method.rawCutoffDay.toString() : '',
+    );
+    final editPaymentCtrl = TextEditingController(
+      text: method.rawPaymentDay != null ? method.rawPaymentDay.toString() : '',
+    );
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Container(
+          decoration: BoxDecoration(
+            color: colors.fondo,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            border: Border(top: BorderSide(color: colors.superficie, width: 1.5)),
+          ),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 16,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: colors.textoSecundario.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Editar Medio de Pago',
+                      style: TextStyle(
+                        color: colors.textoPrimario,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded, color: colors.textoSecundario),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // NOMBRE
+                Text(
+                  'NOMBRE',
+                  style: TextStyle(color: colors.textoSecundario, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: editNameCtrl,
+                  style: TextStyle(color: colors.textoPrimario),
+                  decoration: InputDecoration(
+                    hintText: 'Ej: Tarjeta Sueldo, Billetera...',
+                    fillColor: colors.superficie,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // BANCO
+                Text(
+                  'BANCO / ENTIDAD',
+                  style: TextStyle(color: colors.textoSecundario, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colors.superficie,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _banks.contains(editSelectedBank) ? editSelectedBank : _banks.first,
+                      isExpanded: true,
+                      dropdownColor: colors.superficie,
+                      icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
+                      style: TextStyle(color: colors.textoPrimario, fontSize: 14, fontWeight: FontWeight.w600),
+                      items: _banks.map((b) {
+                        final isSpecial = b.startsWith('+');
+                        return DropdownMenuItem(
+                          value: b,
+                          child: Text(
+                            b,
+                            style: TextStyle(
+                              color: isSpecial ? colors.acento : colors.textoPrimario,
+                              fontWeight: isSpecial ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val == '+ Agregar nuevo banco') {
+                          _handleAddBankDialog();
+                        } else if (val != null) {
+                          setModalState(() => editSelectedBank = val);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // TIPO
+                Text(
+                  'TIPO',
+                  style: TextStyle(color: colors.textoSecundario, fontSize: 12, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() => editSelectedType = 'debito'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: editSelectedType == 'debito' ? colors.acento : colors.superficie,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Débito',
+                            style: TextStyle(
+                              color: editSelectedType == 'debito' ? colors.fondo : colors.textoPrimario,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() => editSelectedType = 'credito'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: editSelectedType == 'credito' ? colors.acento : colors.superficie,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Crédito',
+                            style: TextStyle(
+                              color: editSelectedType == 'credito' ? colors.fondo : colors.textoPrimario,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setModalState(() => editSelectedType = 'efectivo'),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: editSelectedType == 'efectivo' ? colors.acento : colors.superficie,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Efectivo',
+                            style: TextStyle(
+                              color: editSelectedType == 'efectivo' ? colors.fondo : colors.textoPrimario,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Campos condicionales según tipo
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOut,
+                  child: editSelectedType == 'credito'
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 16),
+                            Text(
+                              'LÍNEA DE CRÉDITO',
+                              style: TextStyle(color: colors.textoSecundario, fontSize: 12, fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: editCreditLimitCtrl,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              style: TextStyle(color: colors.textoPrimario),
+                              decoration: InputDecoration(
+                                hintText: 'S/ 5000.00',
+                                fillColor: colors.superficie,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'DÍA DE CORTE (1-31)',
+                                        style: TextStyle(color: colors.textoSecundario, fontSize: 11, fontWeight: FontWeight.w800),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      TextField(
+                                        controller: editCutoffCtrl,
+                                        keyboardType: TextInputType.number,
+                                        style: TextStyle(color: colors.textoPrimario),
+                                        decoration: InputDecoration(
+                                          hintText: 'Ej: 10',
+                                          fillColor: colors.superficie,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'DÍA DE PAGO (1-31)',
+                                        style: TextStyle(color: colors.textoSecundario, fontSize: 11, fontWeight: FontWeight.w800),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      TextField(
+                                        controller: editPaymentCtrl,
+                                        keyboardType: TextInputType.number,
+                                        style: TextStyle(color: colors.textoPrimario),
+                                        decoration: InputDecoration(
+                                          hintText: 'Ej: 15',
+                                          fillColor: colors.superficie,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 16),
+                            Text(
+                              'SALDO INICIAL',
+                              style: TextStyle(color: colors.textoSecundario, fontSize: 12, fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: editInitialBalanceCtrl,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              style: TextStyle(color: colors.textoPrimario),
+                              decoration: InputDecoration(
+                                hintText: 'S/ 0.00',
+                                fillColor: colors.superficie,
+                              ),
+                            ),
+                          ],
+                        ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Botón Guardar Cambios
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.acento,
+                      foregroundColor: colors.fondo,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    onPressed: () async {
+                      final newName = editNameCtrl.text.trim();
+                      if (newName.isEmpty) return;
+
+                      final isCred = editSelectedType == 'credito';
+                      final limit = isCred ? double.tryParse(editCreditLimitCtrl.text) : null;
+                      final cutoff = isCred ? int.tryParse(editCutoffCtrl.text.trim().replaceAll(RegExp(r'[^0-9]'), '')) : null;
+                      final pay = isCred ? int.tryParse(editPaymentCtrl.text.trim().replaceAll(RegExp(r'[^0-9]'), '')) : null;
+                      final saldo = !isCred ? (double.tryParse(editInitialBalanceCtrl.text) ?? 0.0) : 0.0;
+
+                      final dbTipo = isCred ? 'crédito' : (editSelectedType == 'efectivo' ? 'efectivo' : 'débito');
+
+                      Navigator.pop(ctx);
+                      await ref.read(transactionControllerProvider.notifier).actualizarMedioPago(
+                        id: id,
+                        nombre: newName,
+                        banco: editSelectedBank,
+                        tipo: dbTipo,
+                        saldoInicial: saldo,
+                        lineaCredito: limit,
+                        diaCorte: cutoff,
+                        diaPago: pay,
+                      );
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Medio "$newName" actualizado correctamente'),
+                            backgroundColor: colors.superficie,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      'Guardar Cambios',
+                      style: TextStyle(color: colors.fondo, fontSize: 15, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Botón Eliminar Medio
+                SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: colors.gasto,
+                      side: BorderSide(color: colors.gasto.withValues(alpha: 0.5), width: 1.2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    icon: Icon(Icons.delete_outline_rounded, size: 20, color: colors.gasto),
+                    label: Text(
+                      'Eliminar Medio de Pago',
+                      style: TextStyle(color: colors.gasto, fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (diagCtx) => AlertDialog(
+                          backgroundColor: colors.superficie,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                          title: Text(
+                            '¿Eliminar medio de pago?',
+                            style: TextStyle(color: colors.textoPrimario, fontWeight: FontWeight.bold),
+                          ),
+                          content: Text(
+                            'Se ocultará "${method.name}" de tus cuentas. Tus transacciones pasadas se conservarán.',
+                            style: TextStyle(color: colors.textoSecundario),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(diagCtx),
+                              child: Text('Cancelar', style: TextStyle(color: colors.textoSecundario)),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colors.gasto,
+                                foregroundColor: colors.textoPrimario,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                              ),
+                              onPressed: () async {
+                                Navigator.pop(diagCtx); // Cierra diálogo
+                                Navigator.pop(ctx); // Cierra modal
+                                await ref.read(transactionControllerProvider.notifier).desactivarMedioPago(id);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Medio "${method.name}" eliminado'),
+                                      backgroundColor: colors.superficie,
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              },
+                              child: const Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _handleRegisterMethod() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
@@ -345,54 +782,75 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          InkWell(
+                            onTap: () => _showEditPaymentMethodModal(method),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    method.name,
-                                    style: TextStyle(
-                                      color: colors.textoPrimario,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Flexible(
+                                              child: Text(
+                                                method.name,
+                                                style: TextStyle(
+                                                  color: colors.textoPrimario,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w800,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(
+                                              Icons.edit_outlined,
+                                              size: 14,
+                                              color: colors.textoSecundario.withValues(alpha: 0.6),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          method.isCredit
+                                              ? 'pagar: ${method.paymentDate ?? "xx/xx"}'
+                                              : method.type.toUpperCase(),
+                                          style: TextStyle(
+                                            color: colors.textoSecundario,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    method.isCredit
-                                        ? 'pagar: ${method.paymentDate ?? "xx/xx"}'
-                                        : method.type.toUpperCase(),
-                                    style: TextStyle(
-                                      color: colors.textoSecundario,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'S/ ${method.usedAmount.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          color: colors.textoPrimario,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      Text(
+                                        method.isCredit ? 'usado' : 'disponible',
+                                        style: TextStyle(
+                                          color: colors.textoSecundario,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'S/ ${method.usedAmount.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      color: colors.textoPrimario,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                  Text(
-                                    method.isCredit ? 'usado' : 'disponible',
-                                    style: TextStyle(
-                                      color: colors.textoSecundario,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
 
                           // Botón Destacado "Liquidar S/ ..." para tarjetas de crédito con deuda

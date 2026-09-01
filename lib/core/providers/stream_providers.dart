@@ -200,6 +200,7 @@ final todosLosMediosPagoProvider = StreamProvider<List<PaymentMethodItem>>((ref)
       m.nombre,
       m.banco,
       m.tipo,
+      m.saldo_inicial,
       m.linea_credito,
       m.dia_corte,
       m.dia_pago,
@@ -225,18 +226,22 @@ final todosLosMediosPagoProvider = StreamProvider<List<PaymentMethodItem>>((ref)
   );
 
   return query.watch().map((rows) {
+    final now = DateTime.now();
+    final currentMonthStr = now.month.toString().padLeft(2, '0');
+
     return rows.map((row) {
       final id = row.read<int>('id');
       final nombre = row.read<String>('nombre');
       final banco = row.readNullable<String>('banco') ?? '';
       final tipo = row.read<String>('tipo');
+      final saldoInicial = row.readNullable<double>('saldo_inicial') ?? 0.0;
       final lineaCredito = row.readNullable<double>('linea_credito');
       final diaCorte = row.readNullable<int>('dia_corte');
       final diaPago = row.readNullable<int>('dia_pago');
       final monto = row.read<double>('monto_calculado');
 
-      final cutoffStr = diaCorte != null ? '${diaCorte.toString().padLeft(2, '0')}/09' : null;
-      final paymentStr = diaPago != null ? '${diaPago.toString().padLeft(2, '0')}/09' : null;
+      final cutoffStr = diaCorte != null ? '${diaCorte.toString().padLeft(2, '0')}/$currentMonthStr' : null;
+      final paymentStr = diaPago != null ? '${diaPago.toString().padLeft(2, '0')}/$currentMonthStr' : null;
 
       return PaymentMethodItem(
         id: id.toString(),
@@ -244,9 +249,12 @@ final todosLosMediosPagoProvider = StreamProvider<List<PaymentMethodItem>>((ref)
         bank: banco.isNotEmpty ? banco : nombre,
         type: tipo,
         usedAmount: monto,
+        initialBalance: saldoInicial,
         creditLimit: lineaCredito,
         cutoffDate: cutoffStr,
         paymentDate: paymentStr,
+        rawCutoffDay: diaCorte,
+        rawPaymentDay: diaPago,
       );
     }).toList();
   });

@@ -135,5 +135,43 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 50));
     });
+
+    testWidgets('Tapping payment method opens edit modal and allows editing name and saving', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestApp());
+      await tester.pumpAndSettle();
+
+      // Navigate to Medios / Cards tab (Index 2 - credit card icon)
+      await tester.tap(find.byIcon(Icons.credit_card_rounded));
+      await tester.pumpAndSettle();
+
+      // Verify Medios screen
+      expect(find.text('Medios de pago'), findsOneWidget);
+      expect(find.text('Cuenta Sueldo'), findsOneWidget);
+
+      // Tap on 'Cuenta Sueldo' to open Edit Modal
+      await tester.tap(find.text('Cuenta Sueldo'));
+      await tester.pumpAndSettle();
+
+      // Modal should be open
+      expect(find.text('Editar Medio de Pago'), findsOneWidget);
+      expect(find.text('Guardar Cambios'), findsOneWidget);
+      expect(find.text('Eliminar Medio de Pago'), findsOneWidget);
+
+      // Edit name to 'Cuenta Sueldo Principal'
+      final nameField = find.widgetWithText(TextField, 'Cuenta Sueldo');
+      expect(nameField, findsOneWidget);
+      await tester.enterText(nameField, 'Cuenta Sueldo Principal');
+      await tester.pumpAndSettle();
+
+      // Tap Guardar Cambios
+      await tester.tap(find.text('Guardar Cambios'));
+      await tester.pumpAndSettle();
+
+      // Verify updated name is displayed in the list
+      expect(find.text('Cuenta Sueldo Principal'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 50));
+    });
   });
 }

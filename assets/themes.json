@@ -17,14 +17,68 @@
     "gasto": "#E05656",
     "ingreso": "#388E3C"
   },
-  "Dracula": {
-    "fondo": "#282A36",
-    "superficie": "#44475A",
+  "Dracula Dark": {
+    "fondo": "#1E1F29",
+    "superficie": "#282A36",
     "textoPrimario": "#F8F8F2",
-    "textoSecundario": "#6272A4",
+    "textoSecundario": "#959DCB",
     "acento": "#FF79C6",
     "gasto": "#FF5555",
     "ingreso": "#50FA7B"
+  },
+  "Dracula Light": {
+    "fondo": "#F5F5FA",
+    "superficie": "#FFFFFF",
+    "textoPrimario": "#282A36",
+    "textoSecundario": "#6272A4",
+    "acento": "#BD93F9",
+    "gasto": "#E05656",
+    "ingreso": "#50FA7B"
+  },
+  "Dracula": {
+    "fondo": "#1E1F29",
+    "superficie": "#282A36",
+    "textoPrimario": "#F8F8F2",
+    "textoSecundario": "#959DCB",
+    "acento": "#FF79C6",
+    "gasto": "#FF5555",
+    "ingreso": "#50FA7B"
+  },
+  "Emerald Dark": {
+    "fondo": "#0A1915",
+    "superficie": "#122C24",
+    "textoPrimario": "#ECFDF5",
+    "textoSecundario": "#6EE7B7",
+    "acento": "#34D399",
+    "gasto": "#FF6B6B",
+    "ingreso": "#10B981"
+  },
+  "Emerald Light": {
+    "fondo": "#F0FDF4",
+    "superficie": "#FFFFFF",
+    "textoPrimario": "#064E3B",
+    "textoSecundario": "#047857",
+    "acento": "#10B981",
+    "gasto": "#E05656",
+    "ingreso": "#059669"
+  },
+  "Indigo Dark": {
+    "fondo": "#0F172A",
+    "superficie": "#1E293B",
+    "textoPrimario": "#F8FAFC",
+    "textoSecundario": "#94A3B8",
+    "acento": "#818CF8",
+    "gasto": "#FF6B6B",
+    "ingreso": "#34D399"
+  },
+  "Indigo Light": {
+    "fondo": "#F8FAFC",
+    "superficie": "#FFFFFF",
+    "textoPrimario": "#0F172A",
+    "textoSecundario": "#64748B",
+    "acento": "#6366F1",
+    "gasto": "#E05656",
+    "ingreso": "#10B981"
   }
 }
 

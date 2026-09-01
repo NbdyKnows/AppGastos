@@ -49,13 +49,18 @@ class MyApp extends StatelessWidget {
     return Consumer(
       builder: (context, ref, child) {
         final isDarkMode = ref.watch(isDarkModeProvider);
+        final selectedPalette = ref.watch(selectedThemePaletteProvider);
+
         final currentThemes = themes ?? {
           'Lemon Dark': initialColors ?? AppColors.lemonDarkFallback,
           'Lemon Light': AppColors.lemonLightFallback,
         };
-        final themeColors = isDarkMode
-            ? (currentThemes['Lemon Dark'] ?? AppColors.lemonDarkFallback)
-            : (currentThemes['Lemon Light'] ?? AppColors.lemonLightFallback);
+
+        final themeKey = '$selectedPalette ${isDarkMode ? 'Dark' : 'Light'}';
+        final themeColors = currentThemes[themeKey] ??
+            (isDarkMode
+                ? (currentThemes['$selectedPalette Dark'] ?? currentThemes[selectedPalette] ?? AppColors.lemonDarkFallback)
+                : (currentThemes['$selectedPalette Light'] ?? AppColors.lemonLightFallback));
 
         return MaterialApp(
           title: 'AppGastos', // No cambiar este nombre

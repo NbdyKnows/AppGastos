@@ -3,11 +3,14 @@ class PaymentMethodItem {
   final String id;
   final String name;
   final String bank;
-  final String type; // 'debito' | 'credito' | 'efectivo'
+  final String type; // 'débito' | 'crédito' | 'efectivo'
   final double usedAmount;
+  final double initialBalance;
   final double? creditLimit;
   final String? cutoffDate; // Ej: "10/09"
   final String? paymentDate; // Ej: "15/09"
+  final int? rawCutoffDay;
+  final int? rawPaymentDay;
 
   const PaymentMethodItem({
     required this.id,
@@ -15,12 +18,16 @@ class PaymentMethodItem {
     required this.bank,
     required this.type,
     required this.usedAmount,
+    this.initialBalance = 0.0,
     this.creditLimit,
     this.cutoffDate,
     this.paymentDate,
+    this.rawCutoffDay,
+    this.rawPaymentDay,
   });
 
-  bool get isCredit => type.toLowerCase() == 'credito';
+  bool get isCredit =>
+      type.toLowerCase() == 'credito' || type.toLowerCase() == 'crédito';
 
   static List<PaymentMethodItem> get samplePaymentMethods => [
     const PaymentMethodItem(
