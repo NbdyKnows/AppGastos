@@ -57,21 +57,21 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         child: Icon(
           Icons.add_rounded,
           color: colors.fondo,
-          size: 32,
+          size: 30,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
+        notchMargin: 5.0,
         color: colors.superficie,
         elevation: 12,
         padding: EdgeInsets.zero,
         child: SizedBox(
-          height: 60,
+          height: 64,
           child: Row(
             children: [
-              // Lado Izquierdo: Inicio y Historial
+              // Lado Izquierdo: Inicio y Movimientos
               Expanded(
                 child: _buildNavIcon(
                   index: 0,
@@ -84,13 +84,13 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
                 child: _buildNavIcon(
                   index: 1,
                   icon: Icons.swap_horiz_rounded,
-                  label: 'Historial',
+                  label: 'Movimientos',
                   colors: colors,
                 ),
               ),
 
-              // Espacio central perfectamente centrado para el FAB recortado
-              const SizedBox(width: 48),
+              // Espacio central perfectamente dimensionado para el FAB
+              const SizedBox(width: 52),
 
               // Lado Derecho: Medios y Reportes
               Expanded(
@@ -123,18 +123,53 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
     required AppColors colors,
   }) {
     final isSelected = _currentIndex == index;
+    final color = isSelected ? colors.acento : colors.textoSecundario;
+
     return InkWell(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        if (_currentIndex != index) {
+          if (ref.read(hapticsEnabledProvider)) {
+            try {
+              HapticFeedback.selectionClick();
+            } catch (_) {}
+          }
+          setState(() => _currentIndex = index);
+        }
+      },
       borderRadius: BorderRadius.circular(16),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Icon(
-            icon,
-            size: 26,
-            color: isSelected ? colors.acento : colors.textoSecundario,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Indicador superior de pestaña activa estilo Interbank
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 3,
+            width: isSelected ? 26 : 0,
+            decoration: BoxDecoration(
+              color: isSelected ? colors.acento : Colors.transparent,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(3)),
+            ),
           ),
-        ),
+          const Spacer(),
+          Icon(
+            icon,
+            size: 22,
+            color: color,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+              letterSpacing: -0.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+        ],
       ),
     );
   }

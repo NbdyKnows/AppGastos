@@ -74,7 +74,7 @@ void main() {
       // Navigate to Reportes (Tab 3)
       await tester.tap(find.byIcon(Icons.bar_chart_rounded));
       await tester.pumpAndSettle();
-      expect(find.text('Reportes'), findsOneWidget);
+      expect(find.text('Reportes'), findsWidgets);
       expect(find.text('Smart Insights'), findsOneWidget);
       expect(find.text('Por Categoría'), findsOneWidget);
       expect(find.text('Por Método de Pago'), findsOneWidget);
