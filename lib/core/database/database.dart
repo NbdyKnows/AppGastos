@@ -5,6 +5,7 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'daos/categorias_dao.dart';
 import 'daos/reportes_dao.dart';
 import 'daos/saldos_dao.dart';
 import 'daos/themes_dao.dart';
@@ -27,6 +28,7 @@ part 'database.g.dart';
     SaldosDao,
     ReportesDao,
     ThemesDao,
+    CategoriasDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {

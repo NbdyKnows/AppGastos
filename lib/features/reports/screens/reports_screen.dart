@@ -24,6 +24,7 @@ class ReportsScreen extends ConsumerStatefulWidget {
 
 class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTickerProviderStateMixin {
   late TabController _chartTabController;
+  final PageController _chartSwipeController = PageController();
   final PageController _pageController = PageController();
   int _currentInsightPage = 0;
   int _touchedPieIndex = -1;
@@ -38,7 +39,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
     super.initState();
     _chartTabController = TabController(length: 2, vsync: this);
     _chartTabController.addListener(() {
-      if (mounted) setState(() => _touchedPieIndex = -1);
+      if (mounted) {
+        setState(() => _touchedPieIndex = -1);
+        if (_chartSwipeController.hasClients &&
+            !_chartTabController.indexIsChanging &&
+            _chartSwipeController.page?.round() != _chartTabController.index) {
+          _chartSwipeController.animateToPage(
+            _chartTabController.index,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
     });
 
     final now = DateTime.now();
@@ -50,6 +62,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
   @override
   void dispose() {
     _chartTabController.dispose();
+    _chartSwipeController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -336,6 +349,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
                         orElse: () => _mesesDisponibles.first,
                       ),
                       dropdownColor: colors.superficie,
+                      borderRadius: BorderRadius.circular(18),
                       icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.acento),
                       style: TextStyle(
                         color: colors.textoPrimario,
@@ -402,6 +416,15 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
                       unselectedLabelColor: colors.textoSecundario,
                       labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                       unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      onTap: (index) {
+                        if (_chartSwipeController.hasClients) {
+                          _chartSwipeController.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
                       tabs: const [
                         Tab(text: 'Por Categoría'),
                         Tab(text: 'Por Método de Pago'),
@@ -411,103 +434,176 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> with SingleTicker
 
                   const SizedBox(height: 24),
 
-                  // Gráfico PieChart con soporte Empty State
+                  // Gráfico PieChart deslizable con soporte Empty State (PageView horizontal)
                   SizedBox(
-                    height: 190,
-                    child: Stack(
-                      alignment: Alignment.center,
+                    height: 280,
+                    child: PageView(
+                      controller: _chartSwipeController,
+                      onPageChanged: (pageIndex) {
+                        if (_chartTabController.index != pageIndex) {
+                          _chartTabController.animateTo(pageIndex);
+                        }
+                        setState(() => _touchedPieIndex = -1);
+                      },
                       children: [
-                        PieChart(
-                          PieChartData(
-                            pieTouchData: PieTouchData(
-                              touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                                setState(() {
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    _touchedPieIndex = -1;
-                                    return;
-                                  }
-                                  _touchedPieIndex = pieTouchResponse
-                                      .touchedSection!.touchedSectionIndex;
-                                });
-                              },
-                            ),
-                            borderData: FlBorderData(show: false),
-                            sectionsSpace: totalGastosPeriodo > 0 ? 3 : 0,
-                            centerSpaceRadius: 42,
-                            sections: _chartTabController.index == 0
-                                ? _buildCategorySections(categorias, totalGastosCategorias, colors)
-                                : _buildMethodSections(medios, totalGastosMedios, colors),
-                          ),
-                        ),
-                        if (totalGastosPeriodo <= 0)
-                          Column(
+                        // Página 0: Por Categoría
+                        SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.pie_chart_outline_rounded, color: colors.textoSecundario.withValues(alpha: 0.6), size: 28),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Sin gastos',
-                                style: TextStyle(
-                                  color: colors.textoSecundario,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                              SizedBox(
+                                height: 190,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    PieChart(
+                                      PieChartData(
+                                        pieTouchData: PieTouchData(
+                                          touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                            setState(() {
+                                              if (!event.isInterestedForInteractions ||
+                                                  pieTouchResponse == null ||
+                                                  pieTouchResponse.touchedSection == null) {
+                                                _touchedPieIndex = -1;
+                                                return;
+                                              }
+                                              _touchedPieIndex = pieTouchResponse
+                                                  .touchedSection!.touchedSectionIndex;
+                                            });
+                                          },
+                                        ),
+                                        borderData: FlBorderData(show: false),
+                                        sectionsSpace: totalGastosCategorias > 0 ? 3 : 0,
+                                        centerSpaceRadius: 42,
+                                        sections: _buildCategorySections(categorias, totalGastosCategorias, colors),
+                                      ),
+                                    ),
+                                    if (totalGastosCategorias <= 0)
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.pie_chart_outline_rounded, color: colors.textoSecundario.withValues(alpha: 0.6), size: 28),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            'Sin gastos',
+                                            style: TextStyle(
+                                              color: colors.textoSecundario,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
                                 ),
                               ),
+                              const SizedBox(height: 16),
+                              if (categorias.isEmpty || totalGastosCategorias <= 0)
+                                Text(
+                                  'No hay gastos por categoría en este mes',
+                                  style: TextStyle(color: colors.textoSecundario, fontSize: 12),
+                                )
+                              else
+                                Wrap(
+                                  spacing: 14,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  children: List.generate(categorias.length, (i) {
+                                    final item = categorias[i];
+                                    final pct = (item.totalGasto / totalGastosCategorias) * 100;
+                                    final color = _parseHexColor(item.colorHex, colors.acento);
+                                    return _buildLegendItem(
+                                      color,
+                                      '${item.nombre} (${pct.toStringAsFixed(0)}% - S/ ${item.totalGasto.toStringAsFixed(0)})',
+                                      colors,
+                                    );
+                                  }),
+                                ),
                             ],
                           ),
+                        ),
+
+                        // Página 1: Por Método de Pago
+                        SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 190,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    PieChart(
+                                      PieChartData(
+                                        pieTouchData: PieTouchData(
+                                          touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                                            setState(() {
+                                              if (!event.isInterestedForInteractions ||
+                                                  pieTouchResponse == null ||
+                                                  pieTouchResponse.touchedSection == null) {
+                                                _touchedPieIndex = -1;
+                                                return;
+                                              }
+                                              _touchedPieIndex = pieTouchResponse
+                                                  .touchedSection!.touchedSectionIndex;
+                                            });
+                                          },
+                                        ),
+                                        borderData: FlBorderData(show: false),
+                                        sectionsSpace: totalGastosMedios > 0 ? 3 : 0,
+                                        centerSpaceRadius: 42,
+                                        sections: _buildMethodSections(medios, totalGastosMedios, colors),
+                                      ),
+                                    ),
+                                    if (totalGastosMedios <= 0)
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.pie_chart_outline_rounded, color: colors.textoSecundario.withValues(alpha: 0.6), size: 28),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            'Sin gastos',
+                                            style: TextStyle(
+                                              color: colors.textoSecundario,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (medios.isEmpty || totalGastosMedios <= 0)
+                                Text(
+                                  'No hay gastos por medio de pago en este mes',
+                                  style: TextStyle(color: colors.textoSecundario, fontSize: 12),
+                                )
+                              else
+                                Wrap(
+                                  spacing: 14,
+                                  runSpacing: 8,
+                                  alignment: WrapAlignment.center,
+                                  children: List.generate(medios.length, (i) {
+                                    final item = medios[i];
+                                    final pct = (item.totalGasto / totalGastosMedios) * 100;
+                                    final color = methodPalette[i % methodPalette.length];
+                                    return _buildLegendItem(
+                                      color,
+                                      '${item.nombre} (${pct.toStringAsFixed(0)}% - S/ ${item.totalGasto.toStringAsFixed(0)})',
+                                      colors,
+                                    );
+                                  }),
+                                ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // Leyenda Dinámica basada en datos reales
-                  if (_chartTabController.index == 0)
-                    if (categorias.isEmpty || totalGastosCategorias <= 0)
-                      Text(
-                        'No hay gastos por categoría en este mes',
-                        style: TextStyle(color: colors.textoSecundario, fontSize: 12),
-                      )
-                    else
-                      Wrap(
-                        spacing: 14,
-                        runSpacing: 8,
-                        alignment: WrapAlignment.center,
-                        children: List.generate(categorias.length, (i) {
-                          final item = categorias[i];
-                          final pct = (item.totalGasto / totalGastosCategorias) * 100;
-                          final color = _parseHexColor(item.colorHex, colors.acento);
-                          return _buildLegendItem(
-                            color,
-                            '${item.nombre} (${pct.toStringAsFixed(0)}% - S/ ${item.totalGasto.toStringAsFixed(0)})',
-                            colors,
-                          );
-                        }),
-                      )
-                  else
-                    if (medios.isEmpty || totalGastosMedios <= 0)
-                      Text(
-                        'No hay gastos por medio de pago en este mes',
-                        style: TextStyle(color: colors.textoSecundario, fontSize: 12),
-                      )
-                    else
-                      Wrap(
-                        spacing: 14,
-                        runSpacing: 8,
-                        alignment: WrapAlignment.center,
-                        children: List.generate(medios.length, (i) {
-                          final item = medios[i];
-                          final pct = (item.totalGasto / totalGastosMedios) * 100;
-                          final color = methodPalette[i % methodPalette.length];
-                          return _buildLegendItem(
-                            color,
-                            '${item.nombre} (${pct.toStringAsFixed(0)}% - S/ ${item.totalGasto.toStringAsFixed(0)})',
-                            colors,
-                          );
-                        }),
-                      ),
                 ],
               ),
             ),

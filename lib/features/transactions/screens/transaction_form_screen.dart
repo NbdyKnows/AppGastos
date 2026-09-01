@@ -6,6 +6,9 @@ import '../../../core/providers/settings_provider.dart';
 import '../../../core/providers/stream_providers.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/kip_snackbar.dart';
+import '../../cards/widgets/payment_method_picker_sheet.dart';
+import '../../categories/widgets/category_manager_sheet.dart';
 import '../controllers/transaction_controller.dart';
 
 /// Pantalla de Formulario Detallado reutilizable tanto para Modo Creación como Modo Edición.
@@ -156,25 +159,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   void _handleSave() {
     final parsedAmount = double.tryParse(_amountController.text) ?? 0.0;
     if (parsedAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Ingresa un monto válido mayor a 0'),
-          backgroundColor: context.appColors.gasto,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      KipSnackBar.show(context, 'Ingresa un monto válido mayor a 0', isError: true);
       return;
     }
 
     final medioId = _selectedPaymentMethodId;
     if (medioId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Selecciona un medio de pago'),
-          backgroundColor: context.appColors.gasto,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      KipSnackBar.show(context, 'Selecciona un medio de pago', isError: true);
       return;
     }
 
@@ -183,10 +174,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       fecha: _selectedDate,
       tipo: _isExpense ? 'gasto' : 'ingreso',
       medioPagoId: medioId,
-      categoriaId: _selectedCategoryId,
+      // Fix: nunca enviar categoría si es ingreso
+      categoriaId: _isExpense ? _selectedCategoryId : null,
       nota: _titleController.text.trim().isNotEmpty
           ? _titleController.text.trim()
-          : _selectedCategoryName,
+          : (_isExpense ? _selectedCategoryName : 'Ingreso'),
       cuotas: _isCreditMethod ? _installments : 1,
     );
 
@@ -194,9 +186,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       TransactionItem(
         id: widget.initialData?.id ?? 'tx-${DateTime.now().millisecondsSinceEpoch}',
         title: _titleController.text.trim().isEmpty
-            ? (_selectedCategoryName ?? 'Movimiento')
+            ? (_isExpense ? (_selectedCategoryName ?? 'Gasto') : 'Ingreso')
             : _titleController.text.trim(),
-        category: _selectedCategoryName ?? 'General',
+        category: _isExpense ? (_selectedCategoryName ?? 'General') : 'Ingreso',
         amount: parsedAmount,
         isExpense: _isExpense,
         date: _selectedDate,
@@ -216,14 +208,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     // Escuchar el TransactionController para manejo de error y navegación en éxito
     ref.listen<AsyncValue<void>>(transactionControllerProvider, (previous, next) {
       if (next.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al procesar: ${next.error}'),
-            backgroundColor: colors.gasto,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        if (!context.mounted) return;
+        KipSnackBar.show(context, 'Error al procesar: ${next.error}', isError: true);
       } else if (previous is AsyncLoading && next is AsyncData) {
+        if (!context.mounted) return;
+        KipSnackBar.show(context, 'Movimiento guardado ✓');
         AppRouter.pop(context);
       }
     });
@@ -294,7 +283,11 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     ),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _isExpense = false),
+                        onTap: () => setState(() {
+                          _isExpense = false;
+                          _selectedCategoryId = null;
+                          _selectedCategoryName = null;
+                        }),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -401,68 +394,100 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
-
-              // 4. Píldoras de Categoría
-              Text(
-                'CATEGORÍA',
-                style: TextStyle(
-                  color: colors.textoSecundario,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              categoriasAsync.when(
-                data: (categorias) {
-                  if (categorias.isNotEmpty && _selectedCategoryId == null) {
-                    final match = categorias.firstWhere(
-                      (c) => _selectedCategoryName != null && c.nombre.toLowerCase().contains(_selectedCategoryName!.toLowerCase()),
-                      orElse: () => categorias.first,
-                    );
-                    _selectedCategoryId = match.id;
-                    _selectedCategoryName = match.nombre;
-                  }
-
-                  return Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: categorias.map((cat) {
-                      final isSelected = _selectedCategoryId == cat.id;
-                      return ChoiceChip(
-                        label: Text(
-                          cat.nombre,
-                          style: TextStyle(
-                            color: isSelected ? colors.fondo : colors.textoPrimario,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            fontSize: 13,
+              // 4. Píldoras de Categoría — Ocultas completamente en Modo Ingreso
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _isExpense
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+                          Text(
+                            'CATEGORÍA',
+                            style: TextStyle(
+                              color: colors.textoSecundario,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1.2,
+                            ),
                           ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: colors.acento,
-                        backgroundColor: colors.superficie,
-                        side: BorderSide.none,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        onSelected: (val) {
-                          if (val) {
-                            if (ref.read(hapticsEnabledProvider)) {
-                              HapticFeedback.lightImpact();
-                            }
-                            setState(() {
-                              _selectedCategoryId = cat.id;
-                              _selectedCategoryName = cat.nombre;
-                            });
-                          }
-                        },
-                      );
-                    }).toList(),
-                  );
-                },
-                loading: () => const SizedBox.shrink(),
-                error: (e, st) => const SizedBox.shrink(),
+                          const SizedBox(height: 8),
+                          categoriasAsync.when(
+                            data: (categorias) {
+                              if (categorias.isNotEmpty && _selectedCategoryId == null && _isExpense) {
+                                final match = categorias.firstWhere(
+                                  (c) => _selectedCategoryName != null && c.nombre.toLowerCase().contains(_selectedCategoryName!.toLowerCase()),
+                                  orElse: () => categorias.first,
+                                );
+                                _selectedCategoryId = match.id;
+                                _selectedCategoryName = match.nombre;
+                              }
+
+                              return Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  ...categorias.map((cat) {
+                                    final isSelected = _selectedCategoryId == cat.id;
+                                    return ChoiceChip(
+                                      label: Text(
+                                        cat.nombre,
+                                        style: TextStyle(
+                                          color: isSelected ? colors.fondo : colors.textoPrimario,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      selected: isSelected,
+                                      selectedColor: colors.acento,
+                                      backgroundColor: colors.superficie,
+                                      side: BorderSide.none,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      onSelected: (val) {
+                                        if (val) {
+                                          if (ref.read(hapticsEnabledProvider)) {
+                                            HapticFeedback.lightImpact();
+                                          }
+                                          setState(() {
+                                            _selectedCategoryId = cat.id;
+                                            _selectedCategoryName = cat.nombre;
+                                          });
+                                        }
+                                      },
+                                    );
+                                  }),
+                                  // Chip para gestionar o crear nueva categoría
+                                  ActionChip(
+                                    avatar: Icon(Icons.add_rounded, size: 16, color: colors.acento),
+                                    label: Text(
+                                      'Nueva',
+                                      style: TextStyle(
+                                        color: colors.acento,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    backgroundColor: colors.superficie,
+                                    side: BorderSide(
+                                      color: colors.acento.withValues(alpha: 0.35),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    onPressed: () => CategoryManagerSheet.show(context),
+                                  ),
+                                ],
+                              );
+                            },
+                            loading: () => const SizedBox.shrink(),
+                            error: (e, st) => const SizedBox.shrink(),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
 
               const SizedBox(height: 20),
@@ -490,32 +515,51 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                     _selectedPaymentMethodType = match.tipo;
                   }
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: colors.superficie,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<int>(
-                        value: _selectedPaymentMethodId ?? (medios.isNotEmpty ? medios.first.id : null),
-                        isExpanded: true,
-                        dropdownColor: colors.superficie,
-                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
-                        style: TextStyle(color: colors.textoPrimario, fontSize: 15),
-                        items: medios.map((m) {
-                          return DropdownMenuItem(value: m.id, child: Text('${m.nombre} (${m.banco ?? m.tipo})'));
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            final selected = medios.firstWhere((m) => m.id == val);
-                            setState(() {
-                              _selectedPaymentMethodId = val;
-                              _selectedPaymentMethodName = selected.nombre;
-                              _selectedPaymentMethodType = selected.tipo;
-                            });
-                          }
+                  return GestureDetector(
+                    onTap: () {
+                      PaymentMethodPickerSheet.show(
+                        context: context,
+                        medios: medios,
+                        selectedId: _selectedPaymentMethodId ?? (medios.isNotEmpty ? medios.first.id : null),
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedPaymentMethodId = selected.id;
+                            _selectedPaymentMethodName = selected.nombre;
+                            _selectedPaymentMethodType = selected.tipo;
+                          });
                         },
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: colors.superficie,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isCreditMethod ? Icons.credit_card_rounded : Icons.account_balance_wallet_rounded,
+                            size: 20,
+                            color: colors.acento,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _selectedPaymentMethodName != null
+                                  ? '$_selectedPaymentMethodName (${_selectedPaymentMethodType ?? "Cuenta"})'
+                                  : (medios.isNotEmpty ? '${medios.first.nombre} (${medios.first.banco ?? medios.first.tipo})' : 'Selecciona medio'),
+                              style: TextStyle(
+                                color: colors.textoPrimario,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoSecundario, size: 22),
+                        ],
                       ),
                     ),
                   );

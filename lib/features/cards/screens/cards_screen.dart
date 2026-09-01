@@ -164,6 +164,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                     value: selectedOrigenId,
                     isExpanded: true,
                     dropdownColor: colors.superficie,
+                    borderRadius: BorderRadius.circular(18),
                     icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
                     style: TextStyle(color: colors.textoPrimario, fontSize: 14, fontWeight: FontWeight.w600),
                     items: cuentasDebito.map((c) {
@@ -335,6 +336,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                       value: _banks.contains(editSelectedBank) ? editSelectedBank : _banks.first,
                       isExpanded: true,
                       dropdownColor: colors.superficie,
+                      borderRadius: BorderRadius.circular(18),
                       icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
                       style: TextStyle(color: colors.textoPrimario, fontSize: 14, fontWeight: FontWeight.w600),
                       items: _banks.map((b) {
@@ -967,6 +969,7 @@ class _CardsScreenState extends ConsumerState<CardsScreen> {
                         value: _banks.contains(_selectedBank) ? _selectedBank : _banks.first,
                         isExpanded: true,
                         dropdownColor: colors.superficie,
+                        borderRadius: BorderRadius.circular(18),
                         icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
                         style: TextStyle(color: colors.textoPrimario, fontSize: 14, fontWeight: FontWeight.w600),
                         items: _banks.map((b) {

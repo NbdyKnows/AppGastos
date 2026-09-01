@@ -85,23 +85,31 @@ class AppColors extends ThemeExtension<AppColors> {
 
   /// Construye AppColors a partir de un registro de la tabla AppThemes de Drift.
   factory AppColors.fromDbTheme(AppThemeEntry entry) {
+    final surfaceColor = parseHexColor(entry.surfaceHex);
     return AppColors(
       fondo: parseHexColor(entry.backgroundHex),
-      superficie: parseHexColor(entry.surfaceHex),
+      superficie: surfaceColor,
       textoPrimario: parseHexColor(entry.textHex),
       // textoSecundario: calculado como una versión desaturada/opacada del textoPrimario
       textoSecundario: parseHexColor(entry.textHex).withValues(alpha: 0.6),
       acento: parseHexColor(entry.accentHex),
-      ingreso: _deriveIngresoColor(parseHexColor(entry.accentHex)),
+      ingreso: calculateIngresoColor(surfaceColor),
     );
   }
 
-  /// Deriva un color de ingreso a partir del acento del tema.
-  /// Se desplaza el matiz 120° (hacia verde) manteniendo la luminosidad del tema.
-  static Color _deriveIngresoColor(Color acento) {
-    final hsl = HSLColor.fromColor(acento);
-    final newHue = (hsl.hue + 120) % 360;
-    return hsl.withHue(newHue).withSaturation(0.6).toColor();
+  /// Calcula un verde financiero armónico para ingresos con contraste garantizado
+  /// según la luminosidad de [superficie].
+  ///
+  /// Algoritmo:
+  /// - Matiz fijo: 145° (verde esmeralda, universalmente reconocido como ingreso/positivo)
+  /// - Saturación: 75% (vivo y contrastado)
+  /// - Luminosidad:
+  ///     · Superficies oscuras (luminance < 0.18): L = 60% → verde esmeralda brillante legible
+  ///     · Superficies claras: L = 38% → verde bosque profundo contrastante sobre blanco
+  static Color calculateIngresoColor(Color superficie) {
+    final lum = superficie.computeLuminance();
+    final lightness = lum < 0.18 ? 0.60 : 0.38;
+    return HSLColor.fromAHSL(1.0, 145.0, 0.75, lightness).toColor();
   }
 
   /// Convierte un string HEX en objeto Color de Flutter.

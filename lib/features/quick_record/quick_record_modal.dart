@@ -7,6 +7,8 @@ import '../../core/providers/stream_providers.dart';
 import '../../core/routing/app_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/kip_snackbar.dart';
+import '../cards/widgets/payment_method_picker_sheet.dart';
+import '../categories/widgets/category_manager_sheet.dart';
 import '../transactions/controllers/transaction_controller.dart';
 
 /// Modal de Registro Rápido "Fricción Cero".
@@ -229,27 +231,49 @@ class _QuickRecordModalState extends ConsumerState<QuickRecordModal> {
                   return Row(
                     children: [
                       Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(color: colors.superficie, borderRadius: BorderRadius.circular(18)),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<int>(
-                              value: _selectedMethodId ?? (mediosList.isNotEmpty ? mediosList.first.id : null),
-                              isExpanded: true,
-                              dropdownColor: colors.superficie,
-                              icon: Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoPrimario),
-                              style: TextStyle(color: colors.textoPrimario, fontSize: 14, fontWeight: FontWeight.w600),
-                              items: mediosList.map((m) => DropdownMenuItem(value: m.id, child: Text(m.nombre))).toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  final selected = mediosList.firstWhere((m) => m.id == val);
-                                  setState(() {
-                                    _selectedMethodId = val;
-                                    _selectedMethodName = selected.nombre;
-                                    _selectedMethodType = selected.tipo;
-                                  });
-                                }
+                        child: GestureDetector(
+                          onTap: () {
+                            PaymentMethodPickerSheet.show(
+                              context: context,
+                              medios: mediosList,
+                              selectedId: _selectedMethodId ?? (mediosList.isNotEmpty ? mediosList.first.id : null),
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedMethodId = selected.id;
+                                  _selectedMethodName = selected.nombre;
+                                  _selectedMethodType = selected.tipo;
+                                });
                               },
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: colors.superficie,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _isCredit ? Icons.credit_card_rounded : Icons.account_balance_wallet_rounded,
+                                  size: 18,
+                                  color: colors.acento,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _selectedMethodName ?? (mediosList.isNotEmpty ? mediosList.first.nombre : 'Medio de pago'),
+                                    style: TextStyle(
+                                      color: colors.textoPrimario,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Icon(Icons.keyboard_arrow_down_rounded, color: colors.textoSecundario, size: 20),
+                              ],
                             ),
                           ),
                         ),
@@ -311,9 +335,40 @@ class _QuickRecordModalState extends ConsumerState<QuickRecordModal> {
                             height: 40,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
-                              itemCount: categorias.length,
+                              itemCount: categorias.length + 1,
                               separatorBuilder: (ctx, i) => const SizedBox(width: 8),
                               itemBuilder: (ctx, i) {
+                                if (i == categorias.length) {
+                                  return GestureDetector(
+                                    onTap: () => CategoryManagerSheet.show(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: colors.superficie,
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
+                                          color: colors.acento.withValues(alpha: 0.35),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.add_rounded, size: 16, color: colors.acento),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Nueva',
+                                            style: TextStyle(
+                                              color: colors.acento,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+
                                 final cat = categorias[i];
                                 final isSelected = _selectedCategoryId == cat.id;
                                 return GestureDetector(

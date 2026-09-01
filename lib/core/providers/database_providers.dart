@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/daos/categorias_dao.dart';
 import '../database/daos/reportes_dao.dart';
 import '../database/daos/saldos_dao.dart';
 import '../database/daos/themes_dao.dart';
@@ -33,4 +34,10 @@ final reportesDaoProvider = Provider<ReportesDao>((ref) {
 final themesDaoProvider = Provider<ThemesDao>((ref) {
   final db = ref.watch(databaseProvider);
   return db.themesDao;
+});
+
+/// Proveedor del DAO de Categorías
+final categoriasDaoProvider = Provider<CategoriasDao>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.categoriasDao;
 });

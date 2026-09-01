@@ -8,6 +8,7 @@ import '../../../core/providers/settings_provider.dart';
 import '../../../core/providers/theme_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/kip_snackbar.dart';
+import '../../categories/widgets/category_manager_sheet.dart';
 import '../../transactions/controllers/transaction_controller.dart';
 
 /// Menú lateral (Drawer) de Ajustes de Kip.
@@ -314,6 +315,26 @@ class SettingsDrawer extends ConsumerWidget {
               const SizedBox(height: 8),
               Divider(color: colors.textoSecundario.withValues(alpha: 0.2), indent: 16, endIndent: 16),
               const SizedBox(height: 4),
+
+              // Gestión de Categorías
+              ListTile(
+                dense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                leading: Icon(Icons.category_rounded, color: colors.acento, size: 22),
+                title: Text(
+                  'Gestionar Categorías',
+                  style: TextStyle(color: colors.textoPrimario, fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                subtitle: Text(
+                  'Prioridades, colores y presupuestos',
+                  style: TextStyle(color: colors.textoSecundario, fontSize: 11),
+                ),
+                trailing: Icon(Icons.chevron_right_rounded, color: colors.textoSecundario, size: 20),
+                onTap: () {
+                  Navigator.pop(context);
+                  CategoryManagerSheet.show(context);
+                },
+              ),
 
               // Borrar datos
               ListTile(
