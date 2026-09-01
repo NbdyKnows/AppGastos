@@ -63,54 +63,52 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
-        notchMargin: 5.0,
+        notchMargin: 4.0,
         color: colors.superficie,
-        elevation: 12,
+        elevation: 10,
         padding: EdgeInsets.zero,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            children: [
-              // Lado Izquierdo: Inicio y Movimientos
-              Expanded(
-                child: _buildNavIcon(
-                  index: 0,
-                  icon: Icons.home_rounded,
-                  label: 'Inicio',
-                  colors: colors,
-                ),
+        height: 56,
+        child: Row(
+          children: [
+            // Lado Izquierdo: Inicio y Movimientos
+            Expanded(
+              child: _buildNavIcon(
+                index: 0,
+                icon: Icons.home_rounded,
+                label: 'Inicio',
+                colors: colors,
               ),
-              Expanded(
-                child: _buildNavIcon(
-                  index: 1,
-                  icon: Icons.swap_horiz_rounded,
-                  label: 'Movimientos',
-                  colors: colors,
-                ),
+            ),
+            Expanded(
+              child: _buildNavIcon(
+                index: 1,
+                icon: Icons.swap_horiz_rounded,
+                label: 'Movimientos',
+                colors: colors,
               ),
+            ),
 
-              // Espacio central perfectamente dimensionado para el FAB
-              const SizedBox(width: 52),
+            // Espacio central dimensionado para el FAB
+            const SizedBox(width: 48),
 
-              // Lado Derecho: Medios y Reportes
-              Expanded(
-                child: _buildNavIcon(
-                  index: 2,
-                  icon: Icons.credit_card_rounded,
-                  label: 'Medios',
-                  colors: colors,
-                ),
+            // Lado Derecho: Medios y Reportes
+            Expanded(
+              child: _buildNavIcon(
+                index: 2,
+                icon: Icons.credit_card_rounded,
+                label: 'Medios',
+                colors: colors,
               ),
-              Expanded(
-                child: _buildNavIcon(
-                  index: 3,
-                  icon: Icons.bar_chart_rounded,
-                  label: 'Reportes',
-                  colors: colors,
-                ),
+            ),
+            Expanded(
+              child: _buildNavIcon(
+                index: 3,
+                icon: Icons.bar_chart_rounded,
+                label: 'Reportes',
+                colors: colors,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -137,38 +135,45 @@ class _MainNavigationShellState extends ConsumerState<MainNavigationShell> {
         }
       },
       borderRadius: BorderRadius.circular(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        alignment: Alignment.topCenter,
         children: [
           // Indicador superior de pestaña activa estilo Interbank
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 3,
-            width: isSelected ? 26 : 0,
+            width: isSelected ? 24 : 0,
             decoration: BoxDecoration(
               color: isSelected ? colors.acento : Colors.transparent,
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(3)),
             ),
           ),
-          const Spacer(),
-          Icon(
-            icon,
-            size: 22,
-            color: color,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-              letterSpacing: -0.2,
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 3),
+                Icon(
+                  icon,
+                  size: 22,
+                  color: color,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 10.5,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    letterSpacing: -0.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
         ],
       ),
     );
